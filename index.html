@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Trésorerie 2026 — GAEC des Templiers du Larzac</title>
+<meta name="theme-color" content="#1B4332">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-32.png" sizes="32x32">
+<link rel="icon" href="icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: #E4DFCF; color: #262620; padding-bottom: 0; }
+  #app { max-width: 480px; margin: 0 auto; background: #F3EFE4; min-height: 100vh; padding-bottom: 40px; box-shadow: 0 0 50px rgba(27,20,10,0.12); }
+  @media (min-width: 560px) {
+    body { padding: 24px 0; }
+    #app { min-height: auto; border-radius: 20px; overflow: hidden; }
+    .hero { border-radius: 20px 20px 0 0; }
+  }
+  .num { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; }
+  .display { font-family: 'Fraunces', serif; }
+  button { font-family: inherit; cursor: pointer; }
+  input, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { display: none; }
+  svg { display: block; }
+
+  .hero {
+    background: linear-gradient(160deg, #1B4332 0%, #2D6A4F 55%, #3A7D5C 100%);
+    color: #F3EFE4; padding: 28px 20px 34px; position: relative; overflow: hidden;
+  }
+  .hero .ridge { position: absolute; bottom: -1px; left: 0; width: 100%; height: 44px; opacity: 0.18; }
+  .eyebrow { display: flex; align-items: center; gap: 8px; opacity: 0.85; font-size: 12.5px; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 4px; }
+  .hero-title { font-size: 22px; font-weight: 600; margin-bottom: 18px; }
+  .solde-label { font-size: 12.5px; opacity: 0.75; margin-bottom: 2px; }
+  .solde-value { font-size: 40px; font-weight: 700; line-height: 1.1; display: flex; align-items: baseline; gap: 10px; }
+  .ecart-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13.5px; }
+  .alert-box { margin-top: 14px; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; display: flex; gap: 8px; align-items: flex-start; }
+  .alert-critique { background: rgba(240,178,58,0.15); border: 1px solid rgba(240,178,58,0.4); }
+  .alert-vigilance { background: rgba(240,178,58,0.12); border: 1px solid rgba(240,178,58,0.3); }
+
+  .toast { margin: 12px 16px 0; padding: 10px 14px; border-radius: 10px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+  .toast-ok { background: #E4F1E8; color: #1B4332; border: 1px solid #BFDECB; }
+  .toast-error { background: #FBE6E1; color: #8A2E1C; border: 1px solid #F0C4B8; }
+  .toast span:first-of-type { flex: 1; }
+
+  .import-btn { margin: 16px; width: calc(100% - 32px); background: #1B4332; color: #F3EFE4; border: none; border-radius: 12px; padding: 13px 16px; font-size: 14.5px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 8px rgba(27,67,50,0.25); }
+
+  .card { margin: 20px 16px 0; background: #FFFDF8; border-radius: 16px; padding: 18px 14px 8px; border: 1px solid #E8E1D0; }
+  .card-title { font-size: 12.5px; font-weight: 600; color: #52796F; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 12px; padding-left: 4px; }
+  .legend { display: flex; gap: 16px; font-size: 11px; color: #7A7568; padding-left: 8px; margin-top: 2px; padding-bottom: 10px; }
+  .legend span { display: flex; align-items: center; gap: 4px; }
+  .legend i { display: inline-block; width: 10px; height: 2px; }
+
+  .month-card { margin: 20px 16px 0; background: #FFFDF8; border-radius: 16px; padding: 16px 14px; border: 1px solid #E8E1D0; }
+  .month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .month-nav button { background: none; border: none; color: #52796F; padding: 4px; }
+  .month-title { font-size: 16px; font-weight: 600; }
+
+  .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .kpi { border-radius: 10px; padding: 10px 12px; }
+  .kpi-enc { background: #E4F1E8; }
+  .kpi-dec { background: #FBEAE3; }
+  .kpi-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .kpi-value { font-size: 17px; font-weight: 600; }
+  .kpi-budget { font-size: 10.5px; color: #7A7568; }
+
+  .tx-list { max-height: 200px; overflow-y: auto; margin-bottom: 10px; }
+  .tx-row { display: flex; justify-content: space-between; gap: 8px; padding: 7px 2px; border-bottom: 1px solid #F0EAD9; font-size: 12.5px; }
+  .tx-date { color: #7A7568; flex-shrink: 0; }
+  .tx-lib { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tx-amt { font-weight: 500; flex-shrink: 0; }
+
+  .ghost-btn { display: flex; align-items: center; gap: 6px; background: none; border: 1px solid #E8E1D0; color: #B3402C; font-size: 12px; padding: 7px 12px; border-radius: 8px; }
+  .empty-month { text-align: center; padding: 18px 8px; }
+  .empty-month p { font-size: 13px; color: #7A7568; margin-bottom: 12px; }
+  .soft-btn { display: inline-flex; align-items: center; gap: 6px; background: #F3EFE4; border: 1px solid #E8E1D0; color: #52796F; font-size: 12.5px; padding: 8px 14px; border-radius: 8px; }
+
+  .footnote { text-align: center; font-size: 10.5px; color: #A39F8F; margin-top: 22px; padding: 0 30px; }
+
+  /* --- Onglets --- */
+  .tab-bar { display: flex; gap: 6px; margin: 14px 16px 0; background: #E9E2CC; border-radius: 12px; padding: 4px; }
+  .tab-btn { flex: 1; text-align: center; padding: 9px 4px; border: none; background: none; border-radius: 9px; font-size: 12.5px; font-weight: 600; color: #7A7568; }
+  .tab-btn.active { background: #1B4332; color: #F3EFE4; box-shadow: 0 1px 4px rgba(27,67,50,0.25); }
+
+  /* --- Prévisionnel : postes détaillés --- */
+  .solde-initial-row { display: flex; align-items: center; gap: 10px; background: #F9F6EC; border-radius: 10px; padding: 10px 12px; margin-bottom: 16px; }
+  .solde-initial-row label { font-size: 12.5px; color: #52796F; font-weight: 600; flex: 1; }
+  .solde-initial-row input { width: 110px; padding: 8px 10px; border-radius: 8px; border: 1px solid #E8E1D0; font-size: 14px; font-family: 'IBM Plex Mono', monospace; text-align: right; }
+  .poste-section-title { display: flex; justify-content: space-between; align-items: baseline; font-size: 12.5px; font-weight: 600; color: #52796F; text-transform: uppercase; letter-spacing: 0.3px; padding: 4px 2px 8px; border-bottom: 1px solid #E8E1D0; margin-bottom: 4px; }
+  .poste-section-title .num { font-size: 13px; color: #1B4332; text-transform: none; letter-spacing: 0; }
+  .poste-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 4px; border-bottom: 1px solid #F0EAD9; font-size: 13px; }
+  .poste-label { flex: 1; }
+  .poste-total { color: #7A7568; font-size: 12.5px; }
+  .add-poste-btn { width: 100%; text-align: center; padding: 10px; margin-top: 8px; border: 1px dashed #C9BF9E; border-radius: 10px; background: none; color: #52796F; font-size: 12.5px; font-weight: 600; }
+  .poste-months-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .poste-month-cell label { font-size: 10.5px; color: #A39F8F; display: block; margin-bottom: 3px; }
+  .poste-month-cell input { width: 100%; padding: 7px 8px; border-radius: 8px; border: 1px solid #E8E1D0; font-size: 13px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* --- Années --- */
+  .year-pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .year-pill { padding: 9px 16px; border-radius: 999px; border: 1px solid #E8E1D0; background: #F9F6EC; color: #52796F; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+  .year-pill.active { background: #1B4332; border-color: #1B4332; color: #F3EFE4; }
+  .year-pill .del { opacity: 0.6; font-size: 11px; padding-left: 2px; }
+  .add-year-btn { padding: 9px 16px; border-radius: 999px; border: 1px dashed #C9BF9E; background: none; color: #7A7568; font-size: 13px; font-weight: 600; }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
+  .compare-table th { text-align: right; font-size: 10px; color: #A39F8F; text-transform: uppercase; letter-spacing: 0.3px; padding: 4px 6px; font-weight: 600; }
+  .compare-table th:first-child, .compare-table td:first-child { text-align: left; }
+  .compare-table td { text-align: right; padding: 8px 6px; border-top: 1px solid #F0EAD9; font-family: 'IBM Plex Mono', monospace; }
+  .compare-table tr.current-year td { color: #1B4332; font-weight: 600; }
+
+  .modal-bg { position: fixed; inset: 0; background: rgba(27,20,10,0.45); display: flex; align-items: flex-end; justify-content: center; z-index: 50; }
+  .modal { max-width: 480px; }
+  @media (min-width: 560px) {
+    .modal-bg { align-items: center; }
+    .modal { border-radius: 20px; width: 92%; }
+  }
+  .modal { background: #FFFDF8; width: 100%; border-radius: 20px 20px 0 0; padding: 22px 20px 30px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .modal-head .display { font-size: 17px; font-weight: 600; }
+  .drop-zone { border: 2px dashed #D8CFB6; border-radius: 14px; padding: 34px 16px; text-align: center; background: #F9F6EC; margin-bottom: 14px; }
+  .drop-zone.drag { border-color: #1B4332; background: #E4F1E8; }
+  .drop-zone p:first-of-type { font-size: 13.5px; font-weight: 500; margin-top: 8px; }
+  .drop-zone p:last-of-type { font-size: 11.5px; color: #7A7568; margin-top: 4px; }
+  .hint { font-size: 11.5px; color: #A39F8F; line-height: 1.5; }
+  .modal label { font-size: 12px; color: #7A7568; display: block; margin-bottom: 4px; }
+  .modal input[type=number] { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #E8E1D0; margin-bottom: 12px; font-size: 15px; }
+  .save-btn { width: 100%; background: #1B4332; color: #F3EFE4; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; margin-top: 6px; }
+
+  .hidden { display: none !important; }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  .preview-modal { max-height: 85vh; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; display: block; }
+  .preview-hint { font-size: 11.5px; color: #A39F8F; margin-bottom: 10px; line-height: 1.5; }
+  .preview-summary { display: flex; gap: 10px; margin-bottom: 10px; }
+  .preview-summary .chip { flex: 1; border-radius: 10px; padding: 8px 10px; font-size: 11.5px; }
+  .preview-list { border-top: 1px solid #F0EAD9; margin-bottom: 4px; }
+  .preview-row { display: flex; align-items: center; gap: 8px; padding: 8px 2px; border-bottom: 1px solid #F0EAD9; font-size: 12.5px; }
+  .preview-row.excluded { opacity: 0.35; }
+  .preview-row .tx-date { width: 42px; }
+  .preview-row .tx-lib { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .preview-row .tx-amt { width: 78px; text-align: right; }
+  .preview-row .toggle { border: none; background: none; font-size: 15px; color: #7A7568; padding: 2px 4px; flex-shrink: 0; }
+  .preview-actions { display: flex; gap: 10px; position: sticky; bottom: 0; background: #FFFDF8; padding: 12px 0 4px; margin-top: 4px; }
+  .preview-actions button { flex: 1; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; border: none; }
+  .btn-cancel { background: #F3EFE4; color: #7A7568; border: 1px solid #E8E1D0 !important; }
+  .btn-confirm { background: #1B4332; color: #F3EFE4; }
+  .source-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+  .source-tab { flex: 1; text-align: center; padding: 9px; border-radius: 10px; font-size: 12.5px; border: 1px solid #E8E1D0; background: #F9F6EC; color: #52796F; }
+  .source-tab.active { background: #1B4332; color: #F3EFE4; border-color: #1B4332; }
+  .spinner-row { text-align: center; padding: 24px; color: #7A7568; font-size: 13px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div class="hero">
+  <svg class="ridge" viewBox="0 0 400 60" preserveAspectRatio="none">
+    <path d="M0,50 L40,30 L70,42 L110,15 L150,38 L190,20 L230,44 L270,12 L310,36 L350,24 L400,40 L400,60 L0,60 Z" fill="#F3EFE4"/>
+  </svg>
+  <div class="eyebrow">▲ GAEC des Templiers du Larzac</div>
+  <div class="hero-title display" id="heroTitle">Trésorerie 2026</div>
+  <div class="solde-label" id="soldeLabel">Aucune donnée importée pour l'instant</div>
+  <div class="solde-value num display" id="soldeValue">—</div>
+  <div class="ecart-row hidden" id="ecartRow"></div>
+  <div id="alertBox"></div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabBtnDashboard" onclick="switchTab('dashboard')">Suivi</button>
+  <button class="tab-btn" id="tabBtnBudget" onclick="switchTab('budget')">Prévisionnel</button>
+  <button class="tab-btn" id="tabBtnYears" onclick="switchTab('years')">Années</button>
+</div>
+
+<div id="tabDashboard">
+
+<button class="import-btn" onclick="openImportModal()">⬆ Importer le relevé CIC du mois</button>
+
+<div class="card">
+  <div class="card-title">Solde réel vs budget</div>
+  <svg id="lineChart" width="100%" height="190" viewBox="0 0 340 190" preserveAspectRatio="none"></svg>
+  <div class="legend">
+    <span><i style="background:#1B4332"></i>Réel</span>
+    <span><i style="background:#C08A2E;border-top:2px dashed #C08A2E;height:0"></i>Budget</span>
+  </div>
+</div>
+
+<div class="month-card">
+  <div class="month-nav">
+    <button onclick="changeMonth(-1)">‹</button>
+    <div class="month-title display" id="monthTitle"></div>
+    <button onclick="changeMonth(1)">›</button>
+  </div>
+  <div id="monthDetail"></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Flux mensuels réels</div>
+  <svg id="barChart" width="100%" height="150" viewBox="0 0 340 150" preserveAspectRatio="none"></svg>
+</div>
+
+<div class="footnote" id="footnote"></div>
+
+</div><!-- /#tabDashboard -->
+
+<div id="tabBudget" class="hidden">
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title" id="budgetCardTitle">Prévisionnel</div>
+    <div id="budgetCarryAlert"></div>
+    <div class="solde-initial-row">
+      <label>Solde initial au 1er janvier</label>
+      <input type="number" id="budgetSoldeInitial" onchange="saveSoldeInitial()">
+    </div>
+
+    <div class="poste-section-title">
+      <span>Encaissements</span>
+      <span class="num" id="posteTotalEnc">0 €</span>
+    </div>
+    <div id="posteListEnc"></div>
+    <button class="add-poste-btn" onclick="openPosteModal('enc', null)">+ Ajouter un poste d'encaissement</button>
+
+    <div class="poste-section-title" style="margin-top:18px;">
+      <span>Décaissements</span>
+      <span class="num" id="posteTotalDec">0 €</span>
+    </div>
+    <div id="posteListDec"></div>
+    <button class="add-poste-btn" onclick="openPosteModal('dec', null)">+ Ajouter un poste de décaissement</button>
+
+    <div class="hint" style="margin-top:14px;">Touchez un poste pour modifier ses 12 montants mensuels. Le total de chaque poste s'affiche à droite ; la somme de tous les postes alimente la courbe budget de l'onglet Suivi.</div>
+  </div>
+</div>
+
+<div id="tabYears" class="hidden">
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Années suivies</div>
+    <div class="year-pill-row" id="yearPillRow"></div>
+    <button class="add-year-btn" onclick="promptAddYear()" style="margin-top:6px;">+ Ajouter une année</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Comparaison</div>
+    <div id="compareTableWrap"></div>
+  </div>
+</div>
+
+
+</div><!-- /#app -->
+
+<!-- IMPORT MODAL -->
+<div class="modal-bg hidden" id="importModalBg" onclick="closeImportModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="display">Importer un relevé CIC</div>
+      <span onclick="closeImportModal()" style="color:#7A7568;cursor:pointer;font-size:20px;">✕</span>
+    </div>
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:24px;">🏦</div>
+      <p>Toucher pour choisir un fichier (CSV ou PDF)</p>
+      <p>Extrait de compte CIC — CSV recommandé, PDF accepté</p>
+    </div>
+    <input type="file" id="fileInput" accept=".csv,.txt,.pdf,text/csv,text/plain,application/pdf,application/vnd.ms-excel" class="visually-hidden">
+    <div class="hint">
+      <b>CSV</b> (le plus fiable) : sur cic.fr dans un navigateur (pas l'appli mobile) → Mes comptes → Télécharger mes opérations → format CSV.<br>
+      <b>PDF</b> (dépannage) : le relevé exporté par l'appli mobile. La lecture est automatique mais moins sûre — un écran de vérification s'affiche avant tout enregistrement.
+    </div>
+  </div>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div class="modal-bg hidden" id="previewModalBg">
+  <div class="modal preview-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="display" id="previewTitle">Vérifier les opérations</div>
+      <span onclick="closePreviewModal()" style="color:#7A7568;cursor:pointer;font-size:20px;">✕</span>
+    </div>
+    <div id="previewBody"><div class="spinner-row">Lecture du fichier…</div></div>
+  </div>
+</div>
+
+<!-- MANUAL MODAL -->
+<div class="modal-bg hidden" id="manualModalBg" onclick="closeManualModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="display" id="manualMonthTitle">Totaux</div>
+      <span onclick="closeManualModal()" style="color:#7A7568;cursor:pointer;font-size:20px;">✕</span>
+    </div>
+    <label>Total encaissements du mois (€)</label>
+    <input type="number" id="manualEnc" placeholder="0">
+    <label>Total décaissements du mois (€)</label>
+    <input type="number" id="manualDec" placeholder="0">
+    <button class="save-btn" onclick="saveManualEntry()">Enregistrer</button>
+  </div>
+</div>
+
+<!-- POSTE MODAL (édition d'un poste du prévisionnel) -->
+<div class="modal-bg hidden" id="posteModalBg" onclick="closePosteModal(event)">
+  <div class="modal preview-modal" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <div class="display" id="posteModalTitle">Poste</div>
+      <span onclick="closePosteModal()" style="color:#7A7568;cursor:pointer;font-size:20px;">✕</span>
+    </div>
+    <label style="font-size:12px;color:#7A7568;display:block;margin-bottom:4px;">Nom du poste</label>
+    <input type="text" id="posteLabelInput" placeholder="Ex : Vente de laine" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #E8E1D0;margin-bottom:16px;font-size:14px;">
+    <div class="poste-months-grid" id="posteMonthsGrid"></div>
+    <div class="preview-actions" style="margin-top:16px;">
+      <button class="btn-cancel" id="posteDeleteBtn" onclick="deletePoste()">Supprimer</button>
+      <button class="btn-confirm" onclick="savePoste()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   Données par défaut 2026 (issues du prévisionnel Excel détaillé)
+   ================================================================== */
+const MOIS = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+const MOIS_LONG = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const DEFAULT_BUDGET_2026 = {
+  soldeInitial: 3000,
+  postesEnc: [
+    { label: "Ventes lait de brebis (Fromabon)", months: [0,0,0,0,725.46,4715.21,5435.84,0,0,0,0,0] },
+    { label: "Ventes agneaux/agnelets (colis + vif)", months: [392.82,143.73,2314.1,7117.18,1114.59,2299.14,5587.5,4083.55,1436.31,1838.75,0,0] },
+    { label: "Avance PAC", months: [40000,0,0,0,0,0,0,0,0,0,0,0] },
+    { label: "Aides PAC + indemnités loup", months: [0,1842.25,0,0,0,169.0,780.38,0,0,70135.91,0,28451.37] },
+  ],
+  postesDec: [
+    { label: "Alimentation achetée", months: [0,1011.07,11.0,814.0,2356.61,415.93,358.85,0,25.35,90.75,0,45.42] },
+    { label: "Frais vétérinaires", months: [55.19,416.01,0,0,11.0,0,600.68,0,156.82,132.55,0,15.67] },
+    { label: "CUMA + travaux tiers", months: [106.0,0,1044.64,0,0,262.38,300.23,0,418.75,11158.7,0,0] },
+    { label: "Carburant GNR + gazoil", months: [437.58,344.83,343.76,321.06,352.54,1237.73,391.23,457.22,388.63,907.83,1051.04,966.67] },
+    { label: "Engrais, amendements", months: [170.75,0,4304.0,0,0,0,261.0,0,0,0,0,0] },
+    { label: "Atelier découpe", months: [574.94,441.27,0,1014.25,571.47,1081.25,2375.11,1393.61,397.1,3577.44,412.09,163.28] },
+    { label: "Assurances", months: [327.82,719.0,323.16,343.51,343.36,346.58,346.56,346.56,346.56,346.59,346.56,350.68] },
+    { label: "Entretien et réparations", months: [0,1247.49,120.16,6.66,87.54,0,1012.89,60.13,167.61,749.3,2357.91,0] },
+    { label: "Fermages actuels", months: [0,0,0,0,0,0,0,0,815.46,0,0,0] },
+    { label: "Eau", months: [0,1438.8,0,0,0,0,0,-261.85,-94.81,0,0,535.21] },
+    { label: "Électricité", months: [148.84,90.52,0,0,376.62,0,226.0,0,0,0,0,0] },
+    { label: "Frais généraux", months: [838.55,838.55,838.55,838.55,838.55,838.55,838.55,838.55,838.55,838.55,838.55,838.55] },
+    { label: "Rémunérations associés", months: [3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,6160,3240] },
+    { label: "MSA exploitants", months: [0,0,1997.15,0,0,1997.15,0,0,1997.15,0,0,1997.15] },
+    { label: "Salariée temps plein (via AVEM, estimation)", months: [2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500,2500] },
+    { label: "Achats animaux (renouvellement troupeau)", months: [0,0,0,0,0,0,0,0,840.0,13000.0,0,0] },
+    { label: "Crédit-bail matériel (Credipar)", months: [336.68,336.68,336.68,336.68,336.68,336.68,336.68,336.68,336.68,336.68,512.46,0] },
+    { label: "Annuités emprunts CIC existants", months: [129.05,20417.68,0,0,0,0,0,0,0,0,0,0] },
+    { label: "Remboursement avance PAC", months: [0,0,0,0,0,0,0,0,0,40000,0,0] },
+  ],
+};
+const YEARS_KEY = "gaec-treso-years";
+const CURRENT_YEAR_KEY = "gaec-treso-current-year";
+
+/* ==================================================================
+   État (dépend de l'année sélectionnée)
+   ================================================================== */
+let ANNEE = 2026;
+let BUDGET_RAW = { soldeInitial: 0, postesEnc: [], postesDec: [] };
+let BUDGET = { encaissements: new Array(12).fill(0), decaissements: new Array(12).fill(0), solde: new Array(12).fill(0) };
+let SOLDE_INITIAL = 0;
+let STORAGE_KEY = "";
+let transactions = [];
+let selectedMonth = new Date().getMonth();
+
+function budgetKey(year) { return "gaec-treso-budget-" + year; }
+function txKey(year) { return "gaec-treso-2026-transactions".replace("2026", String(year)); }
+
+function loadYearsList() {
+  let years;
+  try {
+    const raw = localStorage.getItem(YEARS_KEY);
+    years = raw ? JSON.parse(raw) : null;
+  } catch (e) { years = null; }
+  if (!years || years.length === 0) years = [2026];
+  return years.slice().sort((a, b) => a - b);
+}
+function saveYearsList(years) {
+  try { localStorage.setItem(YEARS_KEY, JSON.stringify(years)); } catch (e) {}
+}
+function blankBudget() { return { soldeInitial: 0, postesEnc: [], postesDec: [] }; }
+function loadBudgetForYear(year) {
+  try {
+    const raw = localStorage.getItem(budgetKey(year));
+    if (raw) {
+      const b = JSON.parse(raw);
+      if (!b.postesEnc && b.encaissements) {
+        // Ancien format (totaux mensuels sans détail par poste).
+        if (year === 2026) {
+          // Pour 2026 on connaît le détail réel : on l'utilise plutôt que
+          // de garder 2 postes génériques issus de l'ancien format.
+          return JSON.parse(JSON.stringify(DEFAULT_BUDGET_2026));
+        }
+        b.postesEnc = [{ label: "Encaissements (à détailler)", months: b.encaissements }];
+        b.postesDec = [{ label: "Décaissements (à détailler)", months: b.decaissements }];
+      }
+      if (!b.postesEnc) b.postesEnc = [];
+      if (!b.postesDec) b.postesDec = [];
+      return b;
+    }
+  } catch (e) {}
+  if (year === 2026) return JSON.parse(JSON.stringify(DEFAULT_BUDGET_2026));
+  return blankBudget();
+}
+function saveBudgetForYear(year, budget) {
+  try { localStorage.setItem(budgetKey(year), JSON.stringify(budget)); } catch (e) {
+    showToast("error", "Échec de la sauvegarde du prévisionnel.");
+  }
+}
+function deriveBudgetTotals(budget) {
+  const enc = new Array(12).fill(0), dec = new Array(12).fill(0);
+  (budget.postesEnc || []).forEach(p => p.months.forEach((v, m) => enc[m] += (v || 0)));
+  (budget.postesDec || []).forEach(p => p.months.forEach((v, m) => dec[m] += (v || 0)));
+  let cum = budget.soldeInitial;
+  const solde = [];
+  for (let m = 0; m < 12; m++) { cum += enc[m] - dec[m]; solde.push(cum); }
+  return { encaissements: enc, decaissements: dec, solde };
+}
+function sumPoste(p) { return p.months.reduce((s, v) => s + (v || 0), 0); }
+
+function loadTransactions() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    transactions = raw ? JSON.parse(raw) : [];
+  } catch (e) { transactions = []; }
+}
+function saveTransactions() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+  } catch (e) {
+    showToast("error", "Échec de la sauvegarde locale (stockage plein ou navigation privée).");
+  }
+}
+
+/* --- Changement d'année : recharge budget + opérations, ré-affiche tout --- */
+function switchToYear(year) {
+  ANNEE = year;
+  BUDGET_RAW = loadBudgetForYear(year);
+  BUDGET = deriveBudgetTotals(BUDGET_RAW);
+  SOLDE_INITIAL = BUDGET_RAW.soldeInitial;
+  STORAGE_KEY = txKey(year);
+  loadTransactions();
+  const today = new Date();
+  selectedMonth = (today.getFullYear() === year) ? today.getMonth() : 0;
+  try { localStorage.setItem(CURRENT_YEAR_KEY, String(year)); } catch (e) {}
+  document.getElementById("heroTitle").textContent = "Trésorerie " + year;
+  document.getElementById("footnote").textContent =
+    "Solde initial au 01/01/" + year + " : " + eur(SOLDE_INITIAL) + ". Le solde réel s'arrête au dernier mois importé sans interruption.";
+  render();
+  renderBudgetTab();
+  renderYearsTab();
+}
+
+/* ==================================================================
+   Onglets
+   ================================================================== */
+function switchTab(name) {
+  document.getElementById("tabDashboard").classList.toggle("hidden", name !== "dashboard");
+  document.getElementById("tabBudget").classList.toggle("hidden", name !== "budget");
+  document.getElementById("tabYears").classList.toggle("hidden", name !== "years");
+  document.getElementById("tabBtnDashboard").classList.toggle("active", name === "dashboard");
+  document.getElementById("tabBtnBudget").classList.toggle("active", name === "budget");
+  document.getElementById("tabBtnYears").classList.toggle("active", name === "years");
+  if (name === "budget") renderBudgetTab();
+  if (name === "years") renderYearsTab();
+}
+
+/* --- Onglet Prévisionnel : liste de postes, détail au clic --- */
+function renderBudgetTab() {
+  document.getElementById("budgetCardTitle").textContent = "Prévisionnel " + ANNEE;
+  document.getElementById("budgetSoldeInitial").value = SOLDE_INITIAL;
+
+  const alertBox = document.getElementById("budgetCarryAlert");
+  if (BUDGET_RAW.carriedForward && !BUDGET_RAW.reviewed) {
+    const rate = BUDGET_RAW.carriedRate || 0;
+    alertBox.innerHTML =
+      '<div class="alert-box alert-vigilance" style="margin-bottom:14px;">⚠ <span>Solde et prévisionnel reportés automatiquement depuis ' + BUDGET_RAW.carriedFromYear +
+      (rate ? ' (montants ajustés de ' + (rate>0?'+':'') + rate + '%)' : ' (aucun ajustement)') +
+      '. À vérifier poste par poste avant de vous y fier. <span onclick="dismissCarriedForwardAlert()" style="text-decoration:underline;cursor:pointer;font-weight:600;">Marquer comme vérifié</span></span></div>';
+  } else {
+    alertBox.innerHTML = "";
+  }
+
+  function renderPosteList(postes, type) {
+    let html = "";
+    postes.forEach((p, i) => {
+      html += '<div class="poste-row" onclick="openPosteModal(\'' + type + '\',' + i + ')">' +
+        '<span class="poste-label">' + escapeHtml(p.label) + '</span>' +
+        '<span class="poste-total num">' + eur(sumPoste(p)) + '</span>' +
+        '</div>';
+    });
+    return html;
+  }
+  document.getElementById("posteListEnc").innerHTML = renderPosteList(BUDGET_RAW.postesEnc, "enc");
+  document.getElementById("posteListDec").innerHTML = renderPosteList(BUDGET_RAW.postesDec, "dec");
+  document.getElementById("posteTotalEnc").textContent = eur(BUDGET.encaissements.reduce((s,v)=>s+v,0));
+  document.getElementById("posteTotalDec").textContent = eur(BUDGET.decaissements.reduce((s,v)=>s+v,0));
+}
+function saveSoldeInitial() {
+  BUDGET_RAW.soldeInitial = parseFloat(document.getElementById("budgetSoldeInitial").value) || 0;
+  saveBudgetForYear(ANNEE, BUDGET_RAW);
+  switchToYear(ANNEE);
+}
+
+/* --- Fenêtre d'édition d'un poste (12 mois) --- */
+let editingPosteType = null, editingPosteIndex = null;
+function openPosteModal(type, index) {
+  editingPosteType = type;
+  editingPosteIndex = index;
+  const isNew = index === null;
+  const poste = isNew ? { label: "", months: new Array(12).fill(0) } : (type === "enc" ? BUDGET_RAW.postesEnc : BUDGET_RAW.postesDec)[index];
+  document.getElementById("posteModalTitle").textContent = type === "enc" ? "Poste d'encaissement" : "Poste de décaissement";
+  document.getElementById("posteLabelInput").value = poste.label;
+  let grid = "";
+  for (let m = 0; m < 12; m++) {
+    grid += '<div class="poste-month-cell"><label>' + MOIS[m] + '</label><input type="number" data-m="' + m + '" value="' + poste.months[m] + '"></div>';
+  }
+  document.getElementById("posteMonthsGrid").innerHTML = grid;
+  document.getElementById("posteDeleteBtn").classList.toggle("hidden", isNew);
+  document.getElementById("posteModalBg").classList.remove("hidden");
+  lockBodyScroll();
+}
+function closePosteModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById("posteModalBg").classList.add("hidden");
+  unlockBodyScroll();
+}
+function savePoste() {
+  const label = document.getElementById("posteLabelInput").value.trim();
+  if (!label) { showToast("error", "Donnez un nom à ce poste."); return; }
+  const months = [];
+  document.querySelectorAll('#posteMonthsGrid input').forEach(inp => { months[parseInt(inp.dataset.m)] = parseFloat(inp.value) || 0; });
+  const arr = editingPosteType === "enc" ? BUDGET_RAW.postesEnc : BUDGET_RAW.postesDec;
+  if (editingPosteIndex === null) arr.push({ label, months });
+  else arr[editingPosteIndex] = { label, months };
+  saveBudgetForYear(ANNEE, BUDGET_RAW);
+  closePosteModal();
+  showToast("ok", "Poste enregistré.");
+  switchToYear(ANNEE);
+  switchTab("budget");
+}
+function deletePoste() {
+  if (editingPosteIndex === null) return;
+  if (!confirm("Supprimer ce poste du prévisionnel ?")) return;
+  const arr = editingPosteType === "enc" ? BUDGET_RAW.postesEnc : BUDGET_RAW.postesDec;
+  arr.splice(editingPosteIndex, 1);
+  saveBudgetForYear(ANNEE, BUDGET_RAW);
+  closePosteModal();
+  showToast("ok", "Poste supprimé.");
+  switchToYear(ANNEE);
+  switchTab("budget");
+}
+
+/* --- Onglet Années --- */
+function renderYearsTab() {
+  const years = loadYearsList();
+  let pills = "";
+  years.forEach(y => {
+    pills += '<span class="year-pill' + (y === ANNEE ? ' active' : '') + '" onclick="switchToYear(' + y + ');switchTab(\'years\')">' +
+      y +
+      (years.length > 1 ? '<span class="del" onclick="event.stopPropagation();deleteYear(' + y + ')">✕</span>' : '') +
+      '</span>';
+  });
+  document.getElementById("yearPillRow").innerHTML = pills;
+
+  let rows = "";
+  years.forEach(y => {
+    const b = loadBudgetForYear(y);
+    const totals = deriveBudgetTotals(b);
+    const soldeFinalBudget = totals.solde[11];
+    let raw = null;
+    try { raw = localStorage.getItem(txKey(y)); } catch (e) {}
+    const txs = raw ? JSON.parse(raw) : [];
+    const monthly = Array.from({ length: 12 }, () => ({ enc: 0, dec: 0, count: 0 }));
+    txs.forEach(t => {
+      const d = new Date(t.date);
+      if (d.getFullYear() !== y) return;
+      const m = d.getMonth();
+      if (t.montant >= 0) monthly[m].enc += t.montant; else monthly[m].dec += -t.montant;
+      monthly[m].count++;
+    });
+    let cum = b.soldeInitial, lastReal = null;
+    for (let m = 0; m < 12; m++) { if (monthly[m].count === 0) break; cum += monthly[m].enc - monthly[m].dec; lastReal = cum; }
+    rows += '<tr class="' + (y === ANNEE ? 'current-year' : '') + '"><td>' + y + '</td>' +
+      '<td>' + eur(b.soldeInitial) + '</td>' +
+      '<td>' + eur(soldeFinalBudget) + '</td>' +
+      '<td>' + (lastReal !== null ? eur(lastReal) : '—') + '</td></tr>';
+  });
+  document.getElementById("compareTableWrap").innerHTML =
+    '<table class="compare-table"><thead><tr><th>Année</th><th>Solde init.</th><th>Solde fin (budget)</th><th>Solde réel actuel</th></tr></thead><tbody>' + rows + '</tbody></table>';
+}
+function promptAddYear() {
+  const input = prompt("Quelle année ajouter ? (ex : 2027)");
+  if (!input) return;
+  const year = parseInt(input.trim());
+  if (isNaN(year) || year < 2000 || year > 2100) { showToast("error", "Année invalide."); return; }
+  const years = loadYearsList();
+  if (!years.includes(year)) {
+    years.push(year);
+    saveYearsList(years);
+  }
+
+  const prevYear = year - 1;
+  if (years.includes(prevYear) || localStorage.getItem(budgetKey(prevYear))) {
+    const prevBudget = loadBudgetForYear(prevYear);
+    const prevTotals = deriveBudgetTotals(prevBudget);
+
+    // Solde de fin d'année précédente : réel si les 12 mois sont importés, sinon prévisionnel (avec avertissement)
+    let prevTx = [];
+    try { const raw = localStorage.getItem(txKey(prevYear)); prevTx = raw ? JSON.parse(raw) : []; } catch(e) {}
+    const prevMonthly = Array.from({length:12}, ()=>({enc:0,dec:0,count:0}));
+    prevTx.forEach(t => {
+      const d = new Date(t.date);
+      if (d.getFullYear() !== prevYear) return;
+      const m = d.getMonth();
+      if (t.montant>=0) prevMonthly[m].enc+=t.montant; else prevMonthly[m].dec+=-t.montant;
+      prevMonthly[m].count++;
+    });
+    const allMonthsImported = prevMonthly.every(m => m.count > 0);
+    let endingSolde, soldeSource;
+    if (allMonthsImported) {
+      let cum = prevBudget.soldeInitial;
+      prevMonthly.forEach(m => cum += m.enc - m.dec);
+      endingSolde = Math.round(cum*100)/100;
+      soldeSource = "réel";
+    } else {
+      endingSolde = prevTotals.solde[11];
+      soldeSource = "prévisionnel (pas encore toutes les opérations réelles importées pour " + prevYear + ")";
+    }
+
+    const rateInput = prompt(
+      "Solde de fin " + prevYear + " reporté au 01/01/" + year + " : " + Math.round(endingSolde) + " € (" + soldeSource + ").\n\n" +
+      "Le prévisionnel " + prevYear + " sera aussi recopié comme base pour " + year + ".\n" +
+      "Appliquer un taux d'évolution moyen aux montants (inflation/déflation) ? Entrez un pourcentage (ex: 2 pour +2%, -1 pour -1%), ou laissez vide pour aucun changement.",
+      "0"
+    );
+    const rate = rateInput === null ? 0 : (parseFloat(rateInput.replace(",", ".")) || 0);
+    const factor = 1 + rate / 100;
+
+    const newBudget = {
+      soldeInitial: endingSolde,
+      postesEnc: prevBudget.postesEnc.map(p => ({ label: p.label, months: p.months.map(v => Math.round(v * factor * 100) / 100) })),
+      postesDec: prevBudget.postesDec.map(p => ({ label: p.label, months: p.months.map(v => Math.round(v * factor * 100) / 100) })),
+      carriedForward: true,
+      carriedFromYear: prevYear,
+      carriedRate: rate,
+      reviewed: false,
+    };
+    saveBudgetForYear(year, newBudget);
+    showToast("ok", "Année " + year + " créée : solde et prévisionnel reportés depuis " + prevYear + (rate ? " (" + (rate>0?"+":"") + rate + "%)" : "") + ".");
+  } else {
+    showToast("ok", "Année " + year + " ajoutée.");
+  }
+  switchToYear(year);
+}
+function dismissCarriedForwardAlert() {
+  BUDGET_RAW.reviewed = true;
+  saveBudgetForYear(ANNEE, BUDGET_RAW);
+  renderBudgetTab();
+}
+function deleteYear(year) {
+  if (!confirm("Supprimer l'année " + year + " et toutes ses données (prévisionnel + opérations importées) ? Cette action est irréversible.")) return;
+  let years = loadYearsList().filter(y => y !== year);
+  if (years.length === 0) years = [2026];
+  saveYearsList(years);
+  try {
+    localStorage.removeItem(budgetKey(year));
+    localStorage.removeItem(txKey(year));
+  } catch (e) {}
+  if (ANNEE === year) switchToYear(years[0]); else renderYearsTab();
+  showToast("ok", "Année " + year + " supprimée.");
+}
+
+
+/* ==================================================================
+   Utilitaires
+   ================================================================== */
+function eur(n) {
+  if (n === null || n === undefined || isNaN(n)) return "—";
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n) + " €";
+}
+function parseFrenchNumber(raw) {
+  if (raw === undefined || raw === null) return NaN;
+  let s = String(raw).trim();
+  if (s === "") return NaN;
+  s = s.replace(/[€\s]/g, "");
+  if (s.includes(",") && s.includes(".")) s = s.replace(/\./g, "").replace(",", ".");
+  else if (s.includes(",")) s = s.replace(",", ".");
+  return parseFloat(s);
+}
+function parseFrenchDate(raw) {
+  if (!raw) return null;
+  const s = String(raw).trim();
+  let m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/);
+  if (m) {
+    let [, d, mo, y] = m;
+    if (y.length === 2) y = "20" + y;
+    return new Date(parseInt(y), parseInt(mo) - 1, parseInt(d));
+  }
+  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (m) { const [, y, mo, d] = m; return new Date(parseInt(y), parseInt(mo) - 1, parseInt(d)); }
+  return null;
+}
+function normalizeHeader(h) {
+  return String(h || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+}
+function detectDelimiter(line) {
+  const counts = { ";": (line.match(/;/g) || []).length, ",": (line.match(/,/g) || []).length, "\t": (line.match(/\t/g) || []).length };
+  return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+}
+function parseCSV(text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  if (lines.length < 2) throw new Error("Fichier vide ou illisible.");
+  let headerIdx = -1, delim = ";";
+  for (let i = 0; i < Math.min(lines.length, 10); i++) {
+    const norm = normalizeHeader(lines[i]);
+    if (norm.includes("date") && (norm.includes("libell") || norm.includes("montant") || norm.includes("debit") || norm.includes("credit"))) {
+      headerIdx = i; delim = detectDelimiter(lines[i]); break;
+    }
+  }
+  if (headerIdx === -1) throw new Error("Impossible de repérer les colonnes (date / libellé / montant). Vérifiez le fichier exporté depuis CIC en ligne.");
+  const headers = lines[headerIdx].split(delim).map(h => normalizeHeader(h.replace(/"/g, "")));
+  const col = (cands) => headers.findIndex(h => cands.some(c => h.includes(c)));
+  const iDate = col(["date operation", "date valeur", "date"]);
+  const iLibelle = col(["libelle", "intitule", "designation"]);
+  const iDebit = col(["debit"]);
+  const iCredit = col(["credit"]);
+  const iMontant = col(["montant"]);
+  if (iDate === -1) throw new Error("Colonne date introuvable dans le fichier.");
+  const rows = [];
+  for (let i = headerIdx + 1; i < lines.length; i++) {
+    const cells = lines[i].split(delim).map(c => c.replace(/^"|"$/g, "").trim());
+    if (cells.length < 2) continue;
+    const date = parseFrenchDate(cells[iDate]);
+    if (!date) continue;
+    let montant = null;
+    if (iMontant !== -1 && cells[iMontant]) {
+      montant = parseFrenchNumber(cells[iMontant]);
+    } else if (iDebit !== -1 || iCredit !== -1) {
+      const d = iDebit !== -1 ? parseFrenchNumber(cells[iDebit]) : 0;
+      const c = iCredit !== -1 ? parseFrenchNumber(cells[iCredit]) : 0;
+      montant = (isNaN(d) ? 0 : -Math.abs(d)) + (isNaN(c) ? 0 : Math.abs(c));
+    }
+    if (montant === null || isNaN(montant)) continue;
+    const libelle = iLibelle !== -1 ? cells[iLibelle] : "Opération";
+    rows.push({
+      id: date.toISOString().slice(0,10) + "-" + montant + "-" + libelle + "-" + i,
+      date: date.toISOString().slice(0, 10),
+      libelle: libelle || "Opération",
+      montant: Math.round(montant * 100) / 100,
+    });
+  }
+  if (rows.length === 0) throw new Error("Aucune opération valide trouvée dans le fichier.");
+  return rows;
+}
+
+/* --- Lecture PDF (extrait CIC) — détection de colonne par position x,
+   validée sur des relevés réels : les montants sont classés Débit/Crédit
+   selon leur position horizontale par rapport aux en-têtes de colonne,
+   plutôt que par déduction sur le libellé (méthode bien plus fiable). --- */
+async function parsePdfArrayBuffer(arrayBuffer) {
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const amountRe = /^-?\d{1,3}(?:[.\s]\d{3})*,\d{2}$/;
+  const results = [];
+  let counter = 0;
+
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+
+    let debitX = null, creditX = null;
+    content.items.forEach(it => {
+      if (it.str.includes("Débit")) debitX = it.transform[4];
+      if (it.str.includes("Crédit")) creditX = it.transform[4];
+    });
+    const midX = (debitX !== null && creditX !== null) ? (debitX + creditX) / 2 : 460;
+
+    const rowsMap = new Map();
+    content.items.forEach(item => {
+      const y = Math.round(item.transform[5]);
+      if (!rowsMap.has(y)) rowsMap.set(y, []);
+      rowsMap.get(y).push({ x: item.transform[4], str: item.str });
+    });
+    const sortedY = Array.from(rowsMap.keys()).sort((a, b) => b - a);
+    const lines = sortedY.map(y => rowsMap.get(y).sort((a, b) => a.x - b.x));
+
+    for (const items of lines) {
+      const lineText = items.map(i => i.str).join(" ").replace(/\s+/g, " ").trim();
+      const dateMatch = lineText.match(/^(\d{2}\/\d{2}\/\d{4})\s+(\d{2}\/\d{2}\/\d{4})\s+(.*)$/);
+      if (!dateMatch) continue; // ignore soldes, totaux, en-têtes, pieds de page
+      const date = parseFrenchDate(dateMatch[1]);
+      if (!date) continue;
+      let libelle = dateMatch[3];
+      const amountItems = items.filter(i => amountRe.test(i.str.trim()));
+      if (amountItems.length === 0) continue;
+      const amtItem = amountItems[amountItems.length - 1];
+      const val = parseFrenchNumber(amtItem.str);
+      if (isNaN(val) || val === 0) continue;
+      const montant = (amtItem.x < midX) ? -val : val;
+      libelle = libelle.replace(amtItem.str, "").trim() || "Opération";
+      counter++;
+      results.push({
+        id: date.toISOString().slice(0,10) + "-" + montant + "-" + libelle + "-pdf" + counter,
+        date: date.toISOString().slice(0, 10),
+        libelle,
+        montant: Math.round(montant * 100) / 100,
+      });
+    }
+  }
+  if (results.length === 0) throw new Error("Aucune opération détectée dans ce PDF. Vérifiez qu'il s'agit bien d'un relevé CIC standard, ou essayez le CSV depuis cic.fr.");
+  return results;
+}
+
+/* ==================================================================
+   Agrégats
+   ================================================================== */
+function computeMonthly() {
+  const buckets = Array.from({ length: 12 }, () => ({ enc: 0, dec: 0, count: 0 }));
+  for (const t of transactions) {
+    const d = new Date(t.date);
+    if (d.getFullYear() !== ANNEE) continue;
+    const m = d.getMonth();
+    if (t.montant >= 0) buckets[m].enc += t.montant; else buckets[m].dec += -t.montant;
+    buckets[m].count += 1;
+  }
+  return buckets;
+}
+function computeRealSolde(monthly) {
+  const arr = new Array(12).fill(null);
+  let cum = SOLDE_INITIAL;
+  for (let m = 0; m < 12; m++) {
+    if (monthly[m].count === 0) break;
+    cum += monthly[m].enc - monthly[m].dec;
+    arr[m] = cum;
+  }
+  return arr;
+}
+
+/* ==================================================================
+   Rendu
+   ================================================================== */
+function render() {
+  const monthly = computeMonthly();
+  const realSolde = computeRealSolde(monthly);
+  let lastMonth = -1;
+  for (let m = 0; m < 12; m++) if (realSolde[m] !== null) lastMonth = m;
+  const currentSolde = lastMonth >= 0 ? realSolde[lastMonth] : null;
+  const budgetSame = lastMonth >= 0 ? BUDGET.solde[lastMonth] : null;
+  const ecart = currentSolde !== null ? currentSolde - budgetSame : null;
+  const alertLevel = currentSolde !== null ? (currentSolde < 0 ? "critique" : currentSolde < 5000 ? "vigilance" : "ok") : "aucune";
+
+  document.getElementById("soldeLabel").textContent = lastMonth >= 0 ? "Solde constaté au " + MOIS_LONG[lastMonth] : "Aucune donnée importée pour l'instant";
+  document.getElementById("soldeValue").innerHTML = (currentSolde !== null ? eur(currentSolde) : "—") + (alertLevel === "critique" ? ' <span style="color:#F0B23A;font-size:22px;">⚠</span>' : "");
+
+  const ecartRow = document.getElementById("ecartRow");
+  if (currentSolde !== null) {
+    ecartRow.classList.remove("hidden");
+    const up = ecart >= 0;
+    ecartRow.innerHTML = '<span style="color:' + (up ? "#8FD9B0" : "#F0A08A") + '">' + (up ? "▲ +" : "▼ ") + eur(Math.abs(ecart)) + ' vs budget</span><span style="opacity:.6;margin-left:6px;">· budget ' + eur(budgetSame) + '</span>';
+  } else {
+    ecartRow.classList.add("hidden");
+  }
+
+  const alertBox = document.getElementById("alertBox");
+  if (alertLevel === "critique") {
+    alertBox.innerHTML = '<div class="alert-box alert-critique">⚠ <span>Solde négatif. Vérifiez le découvert autorisé avant les prochains prélèvements.</span></div>';
+  } else if (alertLevel === "vigilance") {
+    alertBox.innerHTML = '<div class="alert-box alert-vigilance">⚠ <span>Trésorerie tendue (sous 5 000 €). À surveiller.</span></div>';
+  } else {
+    alertBox.innerHTML = "";
+  }
+
+  drawLineChart(realSolde);
+  drawBarChart(monthly);
+  renderMonthDetail(monthly);
+}
+
+function showToast(type, msg) {
+  const t = document.getElementById("toast");
+  t.className = "toast toast-" + (type === "ok" ? "ok" : "error");
+  t.innerHTML = "<span>" + (type === "ok" ? "✓" : "⚠") + "</span><span>" + msg + "</span>";
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.classList.add("hidden"), 4500);
+}
+
+/* --- Graphique ligne (solde réel vs budget) --- */
+function drawLineChart(realSolde) {
+  const svg = document.getElementById("lineChart");
+  const W = 340, H = 190, padL = 34, padR = 8, padT = 10, padB = 20;
+  const all = BUDGET.solde.concat(realSolde.filter(v => v !== null));
+  const min = Math.min(0, ...all), max = Math.max(...all);
+  const range = (max - min) || 1;
+  const x = i => padL + (i / 11) * (W - padL - padR);
+  const y = v => padT + (1 - (v - min) / range) * (H - padT - padB);
+
+  let svgContent = "";
+  // grid + axis labels
+  const zeroY = y(0);
+  svgContent += '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W-padR) + '" y2="' + zeroY + '" stroke="#B3402C" stroke-dasharray="2,2" stroke-width="1"/>';
+  [min, max].forEach(v => {
+    svgContent += '<text x="2" y="' + (y(v)+3) + '" font-size="9" fill="#7A7568" font-family="IBM Plex Mono">' + Math.round(v/1000) + 'k</text>';
+  });
+  MOIS.forEach((m, i) => {
+    svgContent += '<text x="' + x(i) + '" y="' + (H-4) + '" font-size="9" fill="#7A7568" text-anchor="middle" font-family="IBM Plex Sans">' + m + '</text>';
+  });
+
+  // budget dashed line
+  let budgetPath = BUDGET.solde.map((v, i) => (i === 0 ? "M" : "L") + x(i) + "," + y(v)).join(" ");
+  svgContent += '<path d="' + budgetPath + '" fill="none" stroke="#C08A2E" stroke-width="1.5" stroke-dasharray="4,3"/>';
+
+  // real solde area + line (only contiguous known values)
+  const knownIdx = realSolde.map((v,i)=>v!==null?i:null).filter(v=>v!==null);
+  if (knownIdx.length > 0) {
+    let linePath = knownIdx.map((i, k) => (k === 0 ? "M" : "L") + x(i) + "," + y(realSolde[i])).join(" ");
+    const lastI = knownIdx[knownIdx.length-1], firstI = knownIdx[0];
+    let areaPath = linePath + " L" + x(lastI) + "," + y(min) + " L" + x(firstI) + "," + y(min) + " Z";
+    svgContent += '<defs><linearGradient id="gReel" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1B4332" stop-opacity="0.35"/><stop offset="100%" stop-color="#1B4332" stop-opacity="0"/></linearGradient></defs>';
+    svgContent += '<path d="' + areaPath + '" fill="url(#gReel)" stroke="none"/>';
+    svgContent += '<path d="' + linePath + '" fill="none" stroke="#1B4332" stroke-width="2.5"/>';
+    knownIdx.forEach(i => {
+      svgContent += '<circle cx="' + x(i) + '" cy="' + y(realSolde[i]) + '" r="2.5" fill="#1B4332"/>';
+    });
+  }
+  svg.innerHTML = svgContent;
+}
+
+/* --- Graphique barres (flux mensuels réels) --- */
+function drawBarChart(monthly) {
+  const svg = document.getElementById("barChart");
+  const W = 340, H = 150, padL = 34, padR = 8, padT = 10, padB = 20;
+  const values = monthly.map(m => m.count > 0 ? m.enc - m.dec : null);
+  const known = values.filter(v => v !== null);
+  const max = Math.max(1, ...known.map(Math.abs));
+  const x = i => padL + (i / 12) * (W - padL - padR);
+  const bw = ((W - padL - padR) / 12) * 0.6;
+  const zeroY = padT + (H - padT - padB) / 2;
+  const scale = (H - padT - padB) / 2 / max;
+
+  let svgContent = '<line x1="' + padL + '" y1="' + zeroY + '" x2="' + (W-padR) + '" y2="' + zeroY + '" stroke="#7A7568" stroke-width="1"/>';
+  MOIS.forEach((m, i) => {
+    svgContent += '<text x="' + (x(i)+bw/2) + '" y="' + (H-4) + '" font-size="9" fill="#7A7568" text-anchor="middle">' + m + '</text>';
+    const v = values[i];
+    if (v !== null) {
+      const h = Math.abs(v) * scale;
+      const yPos = v >= 0 ? zeroY - h : zeroY;
+      const color = v >= 0 ? "#1B4332" : "#B3402C";
+      svgContent += '<rect x="' + x(i) + '" y="' + yPos + '" width="' + bw + '" height="' + Math.max(h,1) + '" rx="3" fill="' + color + '"/>';
+    } else {
+      svgContent += '<rect x="' + x(i) + '" y="' + (zeroY-2) + '" width="' + bw + '" height="4" rx="2" fill="#E8E1D0"/>';
+    }
+  });
+  svg.innerHTML = svgContent;
+}
+
+/* --- Détail du mois sélectionné --- */
+function renderMonthDetail(monthly) {
+  document.getElementById("monthTitle").textContent = MOIS_LONG[selectedMonth] + " " + ANNEE;
+  const el = document.getElementById("monthDetail");
+  const m = monthly[selectedMonth];
+  if (m.count > 0) {
+    const txs = transactions
+      .filter(t => { const d = new Date(t.date); return d.getMonth() === selectedMonth && d.getFullYear() === ANNEE; })
+      .sort((a,b) => a.date.localeCompare(b.date));
+    let rows = txs.map(t => (
+      '<div class="tx-row"><span class="tx-date">' + t.date.slice(8,10) + '/' + t.date.slice(5,7) + '</span>' +
+      '<span class="tx-lib">' + escapeHtml(t.libelle) + '</span>' +
+      '<span class="tx-amt num" style="color:' + (t.montant>=0?"#1B4332":"#8A2E1C") + '">' + (t.montant>=0?"+":"") + eur(t.montant) + '</span></div>'
+    )).join("");
+    el.innerHTML =
+      '<div class="kpi-grid">' +
+        '<div class="kpi kpi-enc"><div class="kpi-label" style="color:#2D6A4F">Encaissements</div><div class="kpi-value num" style="color:#1B4332">' + eur(m.enc) + '</div><div class="kpi-budget">budget ' + eur(BUDGET.encaissements[selectedMonth]) + '</div></div>' +
+        '<div class="kpi kpi-dec"><div class="kpi-label" style="color:#B3402C">Décaissements</div><div class="kpi-value num" style="color:#8A2E1C">' + eur(m.dec) + '</div><div class="kpi-budget">budget ' + eur(BUDGET.decaissements[selectedMonth]) + '</div></div>' +
+      '</div>' +
+      '<div style="font-size:11.5px;color:#7A7568;margin-bottom:6px;padding-left:2px;">' + m.count + ' opération(s) importée(s)</div>' +
+      '<div class="tx-list">' + rows + '</div>' +
+      '<button class="ghost-btn" onclick="deleteMonth(' + selectedMonth + ')">🗑 Effacer les données de ce mois</button>';
+  } else {
+    el.innerHTML =
+      '<div class="empty-month"><p>Aucune donnée pour ' + MOIS_LONG[selectedMonth] + '. Budget prévu : encaissements ' + eur(BUDGET.encaissements[selectedMonth]) + ', décaissements ' + eur(BUDGET.decaissements[selectedMonth]) + '.</p>' +
+      '<button class="soft-btn" onclick="openManualModal(' + selectedMonth + ')">✎ Saisir les totaux manuellement</button></div>';
+  }
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ==================================================================
+   Actions
+   ================================================================== */
+function changeMonth(delta) {
+  selectedMonth = (selectedMonth + delta + 12) % 12;
+  render();
+}
+function deleteMonth(m) {
+  transactions = transactions.filter(t => { const d = new Date(t.date); return !(d.getMonth() === m && d.getFullYear() === ANNEE); });
+  saveTransactions();
+  showToast("ok", "Données de " + MOIS_LONG[m] + " effacées.");
+  render();
+}
+function handleFile(file) {
+  const isPdf = /\.pdf$/i.test(file.name) || file.type === "application/pdf";
+  closeImportModal();
+  openPreviewModal(isPdf ? "PDF" : "CSV");
+
+  if (isPdf) {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try {
+        const rows = await parsePdfArrayBuffer(e.target.result);
+        renderPreview(rows, "PDF");
+      } catch (err) {
+        renderPreviewError(err.message);
+      }
+    };
+    reader.onerror = () => renderPreviewError("Impossible de lire le fichier PDF.");
+    reader.readAsArrayBuffer(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const rows = parseCSV(e.target.result);
+        renderPreview(rows, "CSV");
+      } catch (err) {
+        renderPreviewError(err.message);
+      }
+    };
+    reader.onerror = () => renderPreviewError("Impossible de lire le fichier.");
+    reader.readAsText(file, "ISO-8859-1");
+  }
+}
+
+/* --- Verrouillage du défilement de fond pendant qu'une fenêtre est ouverte
+   (empêche le geste de scroll de "traverser" vers la page derrière, un
+   problème classique sur mobile/iOS avec les fenêtres en recouvrement) --- */
+let _scrollLockY = 0;
+function lockBodyScroll() {
+  _scrollLockY = window.scrollY || window.pageYOffset || 0;
+  document.body.style.position = "fixed";
+  document.body.style.top = (-_scrollLockY) + "px";
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+}
+function unlockBodyScroll() {
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  window.scrollTo(0, _scrollLockY);
+}
+
+/* --- Écran de vérification avant import --- */
+let previewRows = [];
+function openPreviewModal(source) {
+  document.getElementById("previewTitle").textContent = "Vérifier les opérations (" + source + ")";
+  document.getElementById("previewBody").innerHTML = '<div class="spinner-row">Lecture du fichier…</div>';
+  document.getElementById("previewModalBg").classList.remove("hidden");
+  lockBodyScroll();
+}
+function closePreviewModal() {
+  document.getElementById("previewModalBg").classList.add("hidden");
+  previewRows = [];
+  unlockBodyScroll();
+}
+function renderPreviewError(msg) {
+  document.getElementById("previewBody").innerHTML =
+    '<div class="toast toast-error" style="margin:0 0 14px;"><span>⚠</span><span>' + escapeHtml(msg) + '</span></div>' +
+    '<button class="ghost-btn" onclick="closePreviewModal()" style="width:100%;justify-content:center;">Fermer</button>';
+}
+function renderPreview(rows, source) {
+  previewRows = rows.map(r => Object.assign({ keep: true }, r));
+  drawPreview(source);
+}
+function drawPreview(source) {
+  const kept = previewRows.filter(r => r.keep);
+  const enc = kept.filter(r => r.montant >= 0).reduce((s, r) => s + r.montant, 0);
+  const dec = kept.filter(r => r.montant < 0).reduce((s, r) => s - r.montant, 0);
+  const isPdf = source === "PDF";
+
+  let html = '';
+  if (isPdf) {
+    html += '<div class="preview-hint">Lecture par position des colonnes du PDF (méthode fiable). Vérifiez les libellés avant de confirmer.</div>';
+  } else {
+    html += '<div class="preview-hint">' + previewRows.length + ' opération(s) détectée(s). Décochez celles à exclure si besoin.</div>';
+  }
+  html += '<div class="preview-summary">' +
+    '<div class="chip" style="background:#E4F1E8;color:#1B4332;">Encaissements<br><b class="num">' + eur(enc) + '</b></div>' +
+    '<div class="chip" style="background:#FBEAE3;color:#8A2E1C;">Décaissements<br><b class="num">' + eur(dec) + '</b></div>' +
+    '</div>';
+  html += '<div class="preview-list">';
+  previewRows.forEach((r, i) => {
+    html += '<div class="preview-row' + (r.keep ? '' : ' excluded') + '">' +
+      '<button class="toggle" onclick="togglePreviewRow(' + i + ')">' + (r.keep ? '☑' : '☐') + '</button>' +
+      '<span class="tx-date">' + r.date.slice(8,10) + '/' + r.date.slice(5,7) + '</span>' +
+      '<span class="tx-lib">' + escapeHtml(r.libelle) + '</span>' +
+      '<span class="tx-amt num" style="color:' + (r.montant>=0?"#1B4332":"#8A2E1C") + '">' + (r.montant>=0?"+":"") + eur(r.montant) + '</span>' +
+      '</div>';
+  });
+  html += '</div>';
+  html += '<div class="preview-actions">' +
+    '<button class="btn-cancel" onclick="closePreviewModal()">Annuler</button>' +
+    '<button class="btn-confirm" onclick="confirmPreviewImport()">Confirmer l\'import</button>' +
+    '</div>';
+  document.getElementById("previewBody").innerHTML = html;
+  document.getElementById("previewBody").dataset.source = source;
+}
+function togglePreviewRow(i) {
+  previewRows[i].keep = !previewRows[i].keep;
+  drawPreview(document.getElementById("previewBody").dataset.source);
+}
+function confirmPreviewImport() {
+  const rows = previewRows.filter(r => r.keep).map(r => ({ id: r.id, date: r.date, libelle: r.libelle, montant: r.montant }));
+  const existingIds = new Set(transactions.map(t => t.id));
+  const fresh = rows.filter(r => !existingIds.has(r.id));
+  transactions = transactions.concat(fresh).sort((a,b) => a.date.localeCompare(b.date));
+  saveTransactions();
+  showToast("ok", fresh.length + " opération(s) importée(s) (" + (rows.length - fresh.length) + " déjà présentes ou exclues).");
+  closePreviewModal();
+  render();
+}
+
+/* --- Modales --- */
+function openImportModal() { document.getElementById("importModalBg").classList.remove("hidden"); lockBodyScroll(); }
+function closeImportModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById("importModalBg").classList.add("hidden"); unlockBodyScroll(); }
+let manualMonth = null;
+function openManualModal(m) {
+  manualMonth = m;
+  document.getElementById("manualMonthTitle").textContent = "Totaux — " + MOIS_LONG[m];
+  document.getElementById("manualEnc").value = "";
+  document.getElementById("manualDec").value = "";
+  document.getElementById("manualModalBg").classList.remove("hidden");
+  lockBodyScroll();
+}
+function closeManualModal(e) { if (e && e.target !== e.currentTarget) return; document.getElementById("manualModalBg").classList.add("hidden"); unlockBodyScroll(); }
+function saveManualEntry() {
+  const enc = parseFloat(document.getElementById("manualEnc").value);
+  const dec = parseFloat(document.getElementById("manualDec").value);
+  const d1 = ANNEE + "-" + String(manualMonth + 1).padStart(2, "0") + "-15";
+  const entries = [];
+  if (!isNaN(enc) && enc) entries.push({ id: "manual-enc-" + manualMonth + "-" + Date.now(), date: d1, libelle: "Saisie manuelle — encaissements", montant: enc });
+  if (!isNaN(dec) && dec) entries.push({ id: "manual-dec-" + manualMonth + "-" + Date.now(), date: d1, libelle: "Saisie manuelle — décaissements", montant: -dec });
+  if (entries.length === 0) { closeManualModal(); return; }
+  transactions = transactions.concat(entries);
+  saveTransactions();
+  closeManualModal();
+  showToast("ok", "Solde de " + MOIS_LONG[manualMonth] + " enregistré.");
+  render();
+}
+
+/* --- Drag & drop + file input --- */
+const dropZone = document.getElementById("dropZone");
+const fileInput = document.getElementById("fileInput");
+fileInput.addEventListener("change", e => { const f = e.target.files[0]; if (f) handleFile(f); });
+dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("drag"); });
+dropZone.addEventListener("dragleave", () => dropZone.classList.remove("drag"));
+dropZone.addEventListener("drop", e => { e.preventDefault(); dropZone.classList.remove("drag"); const f = e.dataTransfer.files[0]; if (f) handleFile(f); });
+
+/* ==================================================================
+   Init
+   ================================================================== */
+if (typeof pdfjsLib !== "undefined") {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+}
+let _initYear = 2026;
+try {
+  const saved = parseInt(localStorage.getItem(CURRENT_YEAR_KEY));
+  const years = loadYearsList();
+  if (!isNaN(saved) && years.includes(saved)) _initYear = saved;
+  else _initYear = years[years.length - 1];
+} catch (e) {}
+switchToYear(_initYear);
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
